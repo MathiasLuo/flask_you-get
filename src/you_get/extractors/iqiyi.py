@@ -3,7 +3,7 @@
 from ..common import *
 from ..extractor import VideoExtractor
 from uuid import uuid4
-from random import random,randint
+from random import random, randint
 import json
 from math import floor
 from zlib import decompress
@@ -44,37 +44,42 @@ bid meaning for quality
 96 topspeed
 
 '''
+
+
 def mix(tvid):
     salt = '4a1caba4b4465345366f28da7c117d20'
-    tm = str(randint(2000,4000))
+    tm = str(randint(2000, 4000))
     sc = hashlib.new('md5', bytes(salt + tm + tvid, 'utf-8')).hexdigest()
     return tm, sc, 'eknas'
 
-def getVRSXORCode(arg1,arg2):
-    loc3=arg2 %3
+
+def getVRSXORCode(arg1, arg2):
+    loc3 = arg2 % 3
     if loc3 == 1:
-        return arg1^121
+        return arg1 ^ 121
     if loc3 == 2:
-        return arg1^72
-    return arg1^103
+        return arg1 ^ 72
+    return arg1 ^ 103
 
 
 def getVrsEncodeCode(vlink):
-    loc6=0
-    loc2=''
-    loc3=vlink.split("-")
-    loc4=len(loc3)
+    loc6 = 0
+    loc2 = ''
+    loc3 = vlink.split("-")
+    loc4 = len(loc3)
     # loc5=loc4-1
-    for i in range(loc4-1,-1,-1):
-        loc6=getVRSXORCode(int(loc3[loc4-i-1],16),i)
-        loc2+=chr(loc6)
+    for i in range(loc4 - 1, -1, -1):
+        loc6 = getVRSXORCode(int(loc3[loc4 - i - 1], 16), i)
+        loc2 += chr(loc6)
     return loc2[::-1]
 
+
 def getDispathKey(rid):
-    tp=")(*&^flash@#$%a"  #magic from swf
-    time=json.loads(get_content("http://data.video.qiyi.com/t?tn="+str(random())))["t"]
-    t=str(int(floor(int(time)/(10*60.0))))
-    return hashlib.new("md5",bytes(t+tp+rid,"utf-8")).hexdigest()
+    tp = ")(*&^flash@#$%a"  # magic from swf
+    time = json.loads(get_content("http://data.video.qiyi.com/t?tn=" + str(random())))["t"]
+    t = str(int(floor(int(time) / (10 * 60.0))))
+    return hashlib.new("md5", bytes(t + tp + rid, "utf-8")).hexdigest()
+
 
 class Iqiyi(VideoExtractor):
     name = "爱奇艺 (Iqiyi)"
@@ -89,27 +94,29 @@ class Iqiyi(VideoExtractor):
         {'id': 'topspeed', 'container': 'f4v', 'video_profile': '最差'},
     ]
 
-    stream_to_bid = {  '4k': 10, 'fullhd' : 5, 'suprt-high' : 4, 'super' : 3, 'high' : 2, 'standard' :1, 'topspeed' :96}
+    stream_to_bid = {'4k': 10, 'fullhd': 5, 'suprt-high': 4, 'super': 3, 'high': 2, 'standard': 1, 'topspeed': 96}
 
-    stream_urls = {  '4k': [] , 'fullhd' : [], 'suprt-high' : [], 'super' : [], 'high' : [], 'standard' :[], 'topspeed' :[]}
+    stream_urls = {'4k': [], 'fullhd': [], 'suprt-high': [], 'super': [], 'high': [], 'standard': [], 'topspeed': []}
 
     baseurl = ''
 
     gen_uid = ''
+
     def getVMS(self):
-        #tm ->the flash run time for md5 usage
-        #um -> vip 1 normal 0
-        #authkey -> for password protected video ,replace '' with your password
-        #puid user.passportid may empty?
-        #TODO: support password protected video
+        # tm ->the flash run time for md5 usage
+        # um -> vip 1 normal 0
+        # authkey -> for password protected video ,replace '' with your password
+        # puid user.passportid may empty?
+        # TODO: support password protected video
         tvid, vid = self.vid
         tm, sc, src = mix(tvid)
         uid = self.gen_uid
-        vmsreq='http://cache.video.qiyi.com/vms?key=fvip&src=1702633101b340d8917a69cf8a4b8c7' +\
-                "&tvId="+tvid+"&vid="+vid+"&vinfo=1&tm="+tm+\
-                "&enc="+sc+\
-                "&qyid="+uid+"&tn="+str(random()) +"&um=1" +\
-                "&authkey="+hashlib.new('md5',bytes(hashlib.new('md5', b'').hexdigest()+str(tm)+tvid,'utf-8')).hexdigest()
+        vmsreq = 'http://cache.video.qiyi.com/vms?key=fvip&src=1702633101b340d8917a69cf8a4b8c7' + \
+                 "&tvId=" + tvid + "&vid=" + vid + "&vinfo=1&tm=" + tm + \
+                 "&enc=" + sc + \
+                 "&qyid=" + uid + "&tn=" + str(random()) + "&um=1" + \
+                 "&authkey=" + hashlib.new('md5', bytes(hashlib.new('md5', b'').hexdigest() + str(tm) + tvid,
+                                                        'utf-8')).hexdigest()
         return json.loads(get_content(vmsreq))
 
     def download_playlist_by_url(self, url, **kwargs):
@@ -153,31 +160,32 @@ class Iqiyi(VideoExtractor):
         #  data.f4v = json.data.f4v
         # if movieIsMember data.vp = json.data.np
 
-        #for highest qualities
-        #for http://www.iqiyi.com/v_19rrmmz5yw.html  not vp -> np
+        # for highest qualities
+        # for http://www.iqiyi.com/v_19rrmmz5yw.html  not vp -> np
         try:
-            if info["data"]['vp']["tkl"]=='' :
+            if info["data"]['vp']["tkl"] == '':
                 raise ValueError
         except:
             log.e("[Error] Do not support for iQIYI VIP video.")
             exit(-1)
 
         vs = info["data"]["vp"]["tkl"][0]["vs"]
-        self.baseurl=info["data"]["vp"]["du"].split("/")
+        self.baseurl = info["data"]["vp"]["du"].split("/")
 
         for stream in self.stream_types:
             for i in vs:
                 if self.stream_to_bid[stream['id']] == i['bid']:
-                    video_links=i["fs"] #now in i["flvs"] not in i["fs"]
+                    video_links = i["fs"]  # now in i["flvs"] not in i["fs"]
                     if not i["fs"][0]["l"].startswith("/"):
                         tmp = getVrsEncodeCode(i["fs"][0]["l"])
                         if tmp.endswith('mp4'):
-                             video_links = i["flvs"]
+                            video_links = i["flvs"]
                     self.stream_urls[stream['id']] = video_links
                     size = 0
                     for l in video_links:
                         size += l['b']
-                    self.streams[stream['id']] = {'container': stream['container'], 'video_profile': stream['video_profile'], 'size' : size}
+                    self.streams[stream['id']] = {'container': stream['container'],
+                                                  'video_profile': stream['video_profile'], 'size': size}
                     break
 
     def extract(self, **kwargs):
@@ -193,21 +201,24 @@ class Iqiyi(VideoExtractor):
             # Extract stream with the best quality
             stream_id = self.streams_sorted[0]['id']
 
-        urls=[]
+        urls = []
         for i in self.stream_urls[stream_id]:
-            vlink=i["l"]
+            vlink = i["l"]
             if not vlink.startswith("/"):
-                #vlink is encode
-                vlink=getVrsEncodeCode(vlink)
-            key=getDispathKey(vlink.split("/")[-1].split(".")[0])
+                # vlink is encode
+                vlink = getVrsEncodeCode(vlink)
+            key = getDispathKey(vlink.split("/")[-1].split(".")[0])
             baseurl = [x for x in self.baseurl]
-            baseurl.insert(-1,key)
-            url="/".join(baseurl)+vlink+'?su='+self.gen_uid+'&qyid='+uuid4().hex+'&client=&z=&bt=&ct=&tn='+str(randint(10000,20000))
+            baseurl.insert(-1, key)
+            url = "/".join(
+                baseurl) + vlink + '?su=' + self.gen_uid + '&qyid=' + uuid4().hex + '&client=&z=&bt=&ct=&tn=' + str(
+                randint(10000, 20000))
             urls.append(json.loads(get_content(url))["l"])
-        #download should be complete in 10 minutes
-        #because the url is generated before start downloading
-        #and the key may be expired after 10 minutes
+        # download should be complete in 10 minutes
+        # because the url is generated before start downloading
+        # and the key may be expired after 10 minutes
         self.streams[stream_id]['src'] = urls
+
 
 site = Iqiyi()
 download = site.download_by_url

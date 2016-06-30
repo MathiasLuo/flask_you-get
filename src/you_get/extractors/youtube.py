@@ -5,35 +5,53 @@ from ..extractor import VideoExtractor
 
 from xml.dom.minidom import parseString
 
+
 class YouTube(VideoExtractor):
     name = "YouTube"
 
     # YouTube media encoding options, in descending quality order.
     # http://en.wikipedia.org/wiki/YouTube#Quality_and_codecs. Retrieved July 17, 2014.
     stream_types = [
-        {'itag': '38', 'container': 'MP4', 'video_resolution': '3072p', 'video_encoding': 'H.264', 'video_profile': 'High', 'video_bitrate': '3.5-5', 'audio_encoding': 'AAC', 'audio_bitrate': '192'},
-        #{'itag': '85', 'container': 'MP4', 'video_resolution': '1080p', 'video_encoding': 'H.264', 'video_profile': '3D', 'video_bitrate': '3-4', 'audio_encoding': 'AAC', 'audio_bitrate': '192'},
-        {'itag': '46', 'container': 'WebM', 'video_resolution': '1080p', 'video_encoding': 'VP8', 'video_profile': '', 'video_bitrate': '', 'audio_encoding': 'Vorbis', 'audio_bitrate': '192'},
-        {'itag': '37', 'container': 'MP4', 'video_resolution': '1080p', 'video_encoding': 'H.264', 'video_profile': 'High', 'video_bitrate': '3-4.3', 'audio_encoding': 'AAC', 'audio_bitrate': '192'},
-        #{'itag': '102', 'container': 'WebM', 'video_resolution': '720p', 'video_encoding': 'VP8', 'video_profile': '3D', 'video_bitrate': '', 'audio_encoding': 'Vorbis', 'audio_bitrate': '192'},
-        {'itag': '45', 'container': 'WebM', 'video_resolution': '720p', 'video_encoding': 'VP8', 'video_profile': '', 'video_bitrate': '2', 'audio_encoding': 'Vorbis', 'audio_bitrate': '192'},
-        #{'itag': '84', 'container': 'MP4', 'video_resolution': '720p', 'video_encoding': 'H.264', 'video_profile': '3D', 'video_bitrate': '2-3', 'audio_encoding': 'AAC', 'audio_bitrate': '192'},
-        {'itag': '22', 'container': 'MP4', 'video_resolution': '720p', 'video_encoding': 'H.264', 'video_profile': 'High', 'video_bitrate': '2-3', 'audio_encoding': 'AAC', 'audio_bitrate': '192'},
-        {'itag': '120', 'container': 'FLV', 'video_resolution': '720p', 'video_encoding': 'H.264', 'video_profile': 'Main@L3.1', 'video_bitrate': '2', 'audio_encoding': 'AAC', 'audio_bitrate': '128'}, # Live streaming only
-        {'itag': '44', 'container': 'WebM', 'video_resolution': '480p', 'video_encoding': 'VP8', 'video_profile': '', 'video_bitrate': '1', 'audio_encoding': 'Vorbis', 'audio_bitrate': '128'},
-        {'itag': '35', 'container': 'FLV', 'video_resolution': '480p', 'video_encoding': 'H.264', 'video_profile': 'Main', 'video_bitrate': '0.8-1', 'audio_encoding': 'AAC', 'audio_bitrate': '128'},
-        #{'itag': '101', 'container': 'WebM', 'video_resolution': '360p', 'video_encoding': 'VP8', 'video_profile': '3D', 'video_bitrate': '', 'audio_encoding': 'Vorbis', 'audio_bitrate': '192'},
-        #{'itag': '100', 'container': 'WebM', 'video_resolution': '360p', 'video_encoding': 'VP8', 'video_profile': '3D', 'video_bitrate': '', 'audio_encoding': 'Vorbis', 'audio_bitrate': '128'},
-        {'itag': '43', 'container': 'WebM', 'video_resolution': '360p', 'video_encoding': 'VP8', 'video_profile': '', 'video_bitrate': '0.5', 'audio_encoding': 'Vorbis', 'audio_bitrate': '128'},
-        {'itag': '34', 'container': 'FLV', 'video_resolution': '360p', 'video_encoding': 'H.264', 'video_profile': 'Main', 'video_bitrate': '0.5', 'audio_encoding': 'AAC', 'audio_bitrate': '128'},
-        #{'itag': '82', 'container': 'MP4', 'video_resolution': '360p', 'video_encoding': 'H.264', 'video_profile': '3D', 'video_bitrate': '0.5', 'audio_encoding': 'AAC', 'audio_bitrate': '96'},
-        {'itag': '18', 'container': 'MP4', 'video_resolution': '270p/360p', 'video_encoding': 'H.264', 'video_profile': 'Baseline', 'video_bitrate': '0.5', 'audio_encoding': 'AAC', 'audio_bitrate': '96'},
-        {'itag': '6', 'container': 'FLV', 'video_resolution': '270p', 'video_encoding': 'Sorenson H.263', 'video_profile': '', 'video_bitrate': '0.8', 'audio_encoding': 'MP3', 'audio_bitrate': '64'},
-        #{'itag': '83', 'container': 'MP4', 'video_resolution': '240p', 'video_encoding': 'H.264', 'video_profile': '3D', 'video_bitrate': '0.5', 'audio_encoding': 'AAC', 'audio_bitrate': '96'},
-        {'itag': '13', 'container': '3GP', 'video_resolution': '', 'video_encoding': 'MPEG-4 Visual', 'video_profile': '', 'video_bitrate': '0.5', 'audio_encoding': 'AAC', 'audio_bitrate': ''},
-        {'itag': '5', 'container': 'FLV', 'video_resolution': '240p', 'video_encoding': 'Sorenson H.263', 'video_profile': '', 'video_bitrate': '0.25', 'audio_encoding': 'MP3', 'audio_bitrate': '64'},
-        {'itag': '36', 'container': '3GP', 'video_resolution': '240p', 'video_encoding': 'MPEG-4 Visual', 'video_profile': 'Simple', 'video_bitrate': '0.175', 'audio_encoding': 'AAC', 'audio_bitrate': '36'},
-        {'itag': '17', 'container': '3GP', 'video_resolution': '144p', 'video_encoding': 'MPEG-4 Visual', 'video_profile': 'Simple', 'video_bitrate': '0.05', 'audio_encoding': 'AAC', 'audio_bitrate': '24'},
+        {'itag': '38', 'container': 'MP4', 'video_resolution': '3072p', 'video_encoding': 'H.264',
+         'video_profile': 'High', 'video_bitrate': '3.5-5', 'audio_encoding': 'AAC', 'audio_bitrate': '192'},
+        # {'itag': '85', 'container': 'MP4', 'video_resolution': '1080p', 'video_encoding': 'H.264', 'video_profile': '3D', 'video_bitrate': '3-4', 'audio_encoding': 'AAC', 'audio_bitrate': '192'},
+        {'itag': '46', 'container': 'WebM', 'video_resolution': '1080p', 'video_encoding': 'VP8', 'video_profile': '',
+         'video_bitrate': '', 'audio_encoding': 'Vorbis', 'audio_bitrate': '192'},
+        {'itag': '37', 'container': 'MP4', 'video_resolution': '1080p', 'video_encoding': 'H.264',
+         'video_profile': 'High', 'video_bitrate': '3-4.3', 'audio_encoding': 'AAC', 'audio_bitrate': '192'},
+        # {'itag': '102', 'container': 'WebM', 'video_resolution': '720p', 'video_encoding': 'VP8', 'video_profile': '3D', 'video_bitrate': '', 'audio_encoding': 'Vorbis', 'audio_bitrate': '192'},
+        {'itag': '45', 'container': 'WebM', 'video_resolution': '720p', 'video_encoding': 'VP8', 'video_profile': '',
+         'video_bitrate': '2', 'audio_encoding': 'Vorbis', 'audio_bitrate': '192'},
+        # {'itag': '84', 'container': 'MP4', 'video_resolution': '720p', 'video_encoding': 'H.264', 'video_profile': '3D', 'video_bitrate': '2-3', 'audio_encoding': 'AAC', 'audio_bitrate': '192'},
+        {'itag': '22', 'container': 'MP4', 'video_resolution': '720p', 'video_encoding': 'H.264',
+         'video_profile': 'High', 'video_bitrate': '2-3', 'audio_encoding': 'AAC', 'audio_bitrate': '192'},
+        {'itag': '120', 'container': 'FLV', 'video_resolution': '720p', 'video_encoding': 'H.264',
+         'video_profile': 'Main@L3.1', 'video_bitrate': '2', 'audio_encoding': 'AAC', 'audio_bitrate': '128'},
+        # Live streaming only
+        {'itag': '44', 'container': 'WebM', 'video_resolution': '480p', 'video_encoding': 'VP8', 'video_profile': '',
+         'video_bitrate': '1', 'audio_encoding': 'Vorbis', 'audio_bitrate': '128'},
+        {'itag': '35', 'container': 'FLV', 'video_resolution': '480p', 'video_encoding': 'H.264',
+         'video_profile': 'Main', 'video_bitrate': '0.8-1', 'audio_encoding': 'AAC', 'audio_bitrate': '128'},
+        # {'itag': '101', 'container': 'WebM', 'video_resolution': '360p', 'video_encoding': 'VP8', 'video_profile': '3D', 'video_bitrate': '', 'audio_encoding': 'Vorbis', 'audio_bitrate': '192'},
+        # {'itag': '100', 'container': 'WebM', 'video_resolution': '360p', 'video_encoding': 'VP8', 'video_profile': '3D', 'video_bitrate': '', 'audio_encoding': 'Vorbis', 'audio_bitrate': '128'},
+        {'itag': '43', 'container': 'WebM', 'video_resolution': '360p', 'video_encoding': 'VP8', 'video_profile': '',
+         'video_bitrate': '0.5', 'audio_encoding': 'Vorbis', 'audio_bitrate': '128'},
+        {'itag': '34', 'container': 'FLV', 'video_resolution': '360p', 'video_encoding': 'H.264',
+         'video_profile': 'Main', 'video_bitrate': '0.5', 'audio_encoding': 'AAC', 'audio_bitrate': '128'},
+        # {'itag': '82', 'container': 'MP4', 'video_resolution': '360p', 'video_encoding': 'H.264', 'video_profile': '3D', 'video_bitrate': '0.5', 'audio_encoding': 'AAC', 'audio_bitrate': '96'},
+        {'itag': '18', 'container': 'MP4', 'video_resolution': '270p/360p', 'video_encoding': 'H.264',
+         'video_profile': 'Baseline', 'video_bitrate': '0.5', 'audio_encoding': 'AAC', 'audio_bitrate': '96'},
+        {'itag': '6', 'container': 'FLV', 'video_resolution': '270p', 'video_encoding': 'Sorenson H.263',
+         'video_profile': '', 'video_bitrate': '0.8', 'audio_encoding': 'MP3', 'audio_bitrate': '64'},
+        # {'itag': '83', 'container': 'MP4', 'video_resolution': '240p', 'video_encoding': 'H.264', 'video_profile': '3D', 'video_bitrate': '0.5', 'audio_encoding': 'AAC', 'audio_bitrate': '96'},
+        {'itag': '13', 'container': '3GP', 'video_resolution': '', 'video_encoding': 'MPEG-4 Visual',
+         'video_profile': '', 'video_bitrate': '0.5', 'audio_encoding': 'AAC', 'audio_bitrate': ''},
+        {'itag': '5', 'container': 'FLV', 'video_resolution': '240p', 'video_encoding': 'Sorenson H.263',
+         'video_profile': '', 'video_bitrate': '0.25', 'audio_encoding': 'MP3', 'audio_bitrate': '64'},
+        {'itag': '36', 'container': '3GP', 'video_resolution': '240p', 'video_encoding': 'MPEG-4 Visual',
+         'video_profile': 'Simple', 'video_bitrate': '0.175', 'audio_encoding': 'AAC', 'audio_bitrate': '36'},
+        {'itag': '17', 'container': '3GP', 'video_resolution': '144p', 'video_encoding': 'MPEG-4 Visual',
+         'video_profile': 'Simple', 'video_bitrate': '0.05', 'audio_encoding': 'AAC', 'audio_bitrate': '24'},
     ]
 
     def decipher(js, s):
@@ -84,17 +102,17 @@ class YouTube(VideoExtractor):
         """Extracts video ID from URL.
         """
         return match1(url, r'youtu\.be/([^/]+)') or \
-          match1(url, r'youtube\.com/embed/([^/?]+)') or \
-          match1(url, r'youtube\.com/v/([^/?]+)') or \
-          match1(url, r'youtube\.com/watch/([^/?]+)') or \
-          parse_query_param(url, 'v') or \
-          parse_query_param(parse_query_param(url, 'u'), 'v')
+               match1(url, r'youtube\.com/embed/([^/?]+)') or \
+               match1(url, r'youtube\.com/v/([^/?]+)') or \
+               match1(url, r'youtube\.com/watch/([^/?]+)') or \
+               parse_query_param(url, 'v') or \
+               parse_query_param(parse_query_param(url, 'u'), 'v')
 
     def get_playlist_id_from_url(url):
         """Extracts playlist ID from URL.
         """
         return parse_query_param(url, 'list') or \
-          parse_query_param(url, 'p')
+               parse_query_param(url, 'p')
 
     def download_playlist_by_url(self, url, **kwargs):
         self.url = url
@@ -171,7 +189,8 @@ class YouTube(VideoExtractor):
             if video_info['errorcode'] == ['150']:
                 video_page = get_content('https://www.youtube.com/watch?v=%s' % self.vid)
                 try:
-                    ytplayer_config = json.loads(re.search('ytplayer.config\s*=\s*([^\n]+});ytplayer', video_page).group(1))
+                    ytplayer_config = json.loads(
+                        re.search('ytplayer.config\s*=\s*([^\n]+});ytplayer', video_page).group(1))
                 except:
                     msg = re.search('class="message">([^<]+)<', video_page).group(1)
                     log.wtf('[Failed] "%s"' % msg.strip())
@@ -184,8 +203,8 @@ class YouTube(VideoExtractor):
                     stream_list = ytplayer_config['args']['url_encoded_fmt_stream_map'].split(',')
                 else:
                     log.wtf('[Error] The uploader has not made this video available in your country.')
-                    #self.title = re.search('<meta name="title" content="([^"]+)"', video_page).group(1)
-                    #stream_list = []
+                    # self.title = re.search('<meta name="title" content="([^"]+)"', video_page).group(1)
+                    # stream_list = []
 
             elif video_info['errorcode'] == ['100']:
                 log.wtf('[Failed] This video does not exist.', exit_code=int(video_info['errorcode'][0]))
@@ -218,23 +237,27 @@ class YouTube(VideoExtractor):
                 for i in ct.split('&'):
                     [k, v] = i.split('=')
                     if k == 'lc' and lang is None: lang = v
-                    if k == 'v' and v[0] != '.': lang = v # auto-generated
+                    if k == 'v' and v[0] != '.': lang = v  # auto-generated
                     if k == 'u': ttsurl = parse.unquote_plus(v)
                 tts_xml = parseString(get_content(ttsurl))
                 transcript = tts_xml.getElementsByTagName('transcript')[0]
                 texts = transcript.getElementsByTagName('text')
-                srt = ""; seq = 0
+                srt = "";
+                seq = 0
                 for text in texts:
-                    if text.firstChild is None: continue # empty element
+                    if text.firstChild is None: continue  # empty element
                     seq += 1
                     start = float(text.getAttribute('start'))
                     if text.getAttribute('dur'):
                         dur = float(text.getAttribute('dur'))
-                    else: dur = 1.0 # could be ill-formed XML
+                    else:
+                        dur = 1.0  # could be ill-formed XML
                     finish = start + dur
-                    m, s = divmod(start, 60); h, m = divmod(m, 60)
+                    m, s = divmod(start, 60);
+                    h, m = divmod(m, 60)
                     start = '{:0>2}:{:0>2}:{:06.3f}'.format(int(h), int(m), s).replace('.', ',')
-                    m, s = divmod(finish, 60); h, m = divmod(m, 60)
+                    m, s = divmod(finish, 60);
+                    h, m = divmod(m, 60)
                     finish = '{:0>2}:{:0>2}:{:06.3f}'.format(int(h), int(m), s).replace('.', ',')
                     content = text.firstChild.nodeValue
 
@@ -243,7 +266,8 @@ class YouTube(VideoExtractor):
                     srt += '%s\n\n' % content
 
                 self.caption_tracks[lang] = srt
-        except: pass
+        except:
+            pass
 
         # Prepare DASH streams
         try:
@@ -304,7 +328,7 @@ class YouTube(VideoExtractor):
                                   parse.unquote(i.split('=')[1]))
                                  for i in afmt.split('&')])
                            for afmt in ytplayer_config['args']['adaptive_fmts'].split(',')]
-                for stream in streams: # audio
+                for stream in streams:  # audio
                     if stream['type'].startswith('audio/mp4'):
                         dash_mp4_a_url = stream['url']
                         if 's' in stream:
@@ -317,7 +341,7 @@ class YouTube(VideoExtractor):
                             sig = self.__class__.decipher(self.js, stream['s'])
                             dash_webm_a_url += '&signature={}'.format(sig)
                         dash_webm_a_size = stream['clen']
-                for stream in streams: # video
+                for stream in streams:  # video
                     if 'size' in stream:
                         if stream['type'].startswith('video/mp4'):
                             mimeType = 'video/mp4'
@@ -384,6 +408,7 @@ class YouTube(VideoExtractor):
 
             self.streams[stream_id]['src'] = [src]
             self.streams[stream_id]['size'] = urls_size(self.streams[stream_id]['src'])
+
 
 site = YouTube()
 download = site.download_by_url

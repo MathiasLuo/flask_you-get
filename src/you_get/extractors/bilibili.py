@@ -120,6 +120,11 @@ def bilibili_live_download_by_cid(cid, title, output_dir='.', merge=True, info_o
 def bilibili_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     html = get_content(url)
 
+    if re.match(r'https?://bangumi\.bilibili\.com/', url):
+        # quick hack for bangumi URLs
+        url = r1(r'"([^"]+)" class="v-av-link"', html)
+        html = get_content(url)
+
     title = r1_of([r'<meta name="title" content="([^<>]{1,999})" />',
                    r'<h1[^>]*>([^<>]+)</h1>'], html)
     if title:
@@ -142,7 +147,7 @@ def bilibili_download(url, output_dir='.', merge=True, info_only=False, **kwargs
             cids = []
             pages = re.findall('<option value=\'([^\']*)\'', html)
             titles = re.findall('<option value=.*>(.+)</option>', html)
-            for page in pages:
+            for i, page in enumerate(pages):
                 html = get_html("http://www.bilibili.com%s" % page)
                 flashvars = r1_of([r'(cid=\d+)',
                                    r'flashvars="([^"]+)"',
@@ -150,6 +155,10 @@ def bilibili_download(url, output_dir='.', merge=True, info_only=False, **kwargs
                 if flashvars:
                     t, cid = flashvars.split('=', 1)
                     cids.append(cid.split('&')[0])
+                if url.endswith(page):
+                    cids = [cid.split('&')[0]]
+                    titles = [titles[i]]
+                    break
 
             # no multi-P
             if not pages:

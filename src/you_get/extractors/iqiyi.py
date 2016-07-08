@@ -3,7 +3,7 @@
 from ..common import *
 from ..extractor import VideoExtractor
 from uuid import uuid4
-from random import random,randint
+from random import random, randint
 import json
 from math import floor
 from zlib import decompress
@@ -82,6 +82,7 @@ def getDispathKey(rid):
     return hashlib.new("md5",bytes(t+tp+rid,"utf-8")).hexdigest()
 '''
 
+
 class Iqiyi(VideoExtractor):
     name = "爱奇艺 (Iqiyi)"
 
@@ -90,21 +91,21 @@ class Iqiyi(VideoExtractor):
         {'id': 'standard', 'container': 'mp4', 'video_profile': '标清'},
     ]
 
-    supported_stream_types = [ 'high', 'standard']
+    supported_stream_types = ['high', 'standard']
 
+    stream_to_bid = {'4k': 10, 'fullhd': 5, 'suprt-high': 4, 'super': 3, 'high': 2, 'standard': 1, 'topspeed': 96}
 
-    stream_to_bid = {  '4k': 10, 'fullhd' : 5, 'suprt-high' : 4, 'super' : 3, 'high' : 2, 'standard' :1, 'topspeed' :96}
-
-    def getVMS(self,rate):
-        #tm ->the flash run time for md5 usage
-        #um -> vip 1 normal 0
-        #authkey -> for password protected video ,replace '' with your password
-        #puid user.passportid may empty?
-        #TODO: support password protected video
+    def getVMS(self, rate):
+        # tm ->the flash run time for md5 usage
+        # um -> vip 1 normal 0
+        # authkey -> for password protected video ,replace '' with your password
+        # puid user.passportid may empty?
+        # TODO: support password protected video
         tvid, vid = self.vid
         t = int(time.time() * 1000)
         sc = gen_sc(tvid, t).decode('utf-8')
-        vmsreq= 'http://cache.m.iqiyi.com/jp/tmts/{}/{}/?platForm=h5&rate={}&tvid={}&vid={}&cupid=qc_100001_100186&type=mp4&olimit=0&agenttype=13&src=d846d0c32d664d32b6b54ea48997a589&sc={}&t={}&__jsT=null'.format(tvid, vid, rate, tvid, vid, sc, t - 7)
+        vmsreq = 'http://cache.m.iqiyi.com/jp/tmts/{}/{}/?platForm=h5&rate={}&tvid={}&vid={}&cupid=qc_100001_100186&type=mp4&olimit=0&agenttype=13&src=d846d0c32d664d32b6b54ea48997a589&sc={}&t={}&__jsT=null'.format(
+            tvid, vid, rate, tvid, vid, sc, t - 7)
         return json.loads(get_content(vmsreq)[13:])
 
     def download_playlist_by_url(self, url, **kwargs):
@@ -127,13 +128,18 @@ class Iqiyi(VideoExtractor):
             videoid = r1(r'#curid=.+_(.*)$', self.url) or \
                       r1(r'vid=([^&]+)', self.url) or \
                       r1(r'data-player-videoid="([^"]+)"', html)
+            print(tvid)
+            print(videoid)
             self.vid = (tvid, videoid)
 
         for stream in self.supported_stream_types:
             info = self.getVMS(self.stream_to_bid[stream])
             if info["code"] == "A00000":
                 self.title = info['data']['playInfo']['vn']
-                self.streams[stream] = {'container': 'mp4', 'video_profile': stream, 'src' : [info['data']['m3u']], 'size' : url_size(info['data']['m3u'])}
+                self.streams[stream] = {'container': 'mp4', 'video_profile': stream, 'src': [info['data']['m3u']],
+                                        'size': url_size(info['data']['m3u'])}
+
+
 '''
         if info["code"] != "A000000":
             log.e("[error] outdated iQIYI key")

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import chardet
 
 __all__ = ['letv_download', 'letvcloud_download', 'letvcloud_download_by_vu']
 
@@ -17,6 +18,7 @@ def get_timestamp():
     result = get_content(url)
     return json.loads(result)['stime']
 
+
 # @DEPRECATED
 def get_key(t):
     for s in range(0, 8):
@@ -33,6 +35,7 @@ def calcTimeKey(t):
 
 
 def decode(data):
+    print("data's  length:%d" % len(data))
     version = data[0:5]
     if version.lower() == b'vc_01':
         # get real m3u8
@@ -46,6 +49,7 @@ def decode(data):
         loc7 = [0] * length
         for i in range(length):
             loc7[i] = (loc6[2 * i] << 4) + loc6[2 * i + 1]
+        print("str's  length:%d" % len(''.join([chr(i) for i in loc7])))
         return ''.join([chr(i) for i in loc7])
     else:
         # directly return
@@ -55,6 +59,7 @@ def decode(data):
 def video_info(vid, **kwargs):
     url = 'http://api.letv.com/mms/out/video/playJson?id={}&platid=1&splatid=101&format=1&tkey={}&domain=www.letv.com'.format(
         vid, calcTimeKey(int(time.time())))
+    print(url)
     r = get_content(url, decoded=False)
     info = json.loads(str(r, "utf-8"))
 
@@ -83,8 +88,8 @@ def video_info(vid, **kwargs):
     # hold on ! more things to do
     # to decode m3u8 (encoded)
     m3u8 = get_content(info2["location"], decoded=False)
-    print(str(m3u8))
     m3u8_list = decode(m3u8)
+    print(m3u8_list)
     urls = re.findall(r'^[^#][^\r]*', m3u8_list, re.MULTILINE)
     print(urls)
     return ext, urls

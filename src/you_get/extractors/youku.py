@@ -34,6 +34,37 @@ class Youku(VideoExtractor):
     def trans_e(a, c):
         """str, str->str
         This is an RC4 encryption."""
+
+        f = h = 0
+        b = list(range(256))
+        result = ''
+        # print("a.length:%d" % len(a))
+        while h < 256:
+            # print("f:%d" % f)
+            # print("b[n]:%d" % b[h])
+            # print("ord:%s" % ord(a[h % len(a)]))
+
+            f = (f + b[h] + ord(a[h % len(a)])) % 256
+            b[h], b[f] = b[f], b[h]
+            h += 1
+
+        q = f = h = 0
+        while q < len(c):
+            h = (h + 1) % 256
+            f = (f + b[h]) % 256
+            b[h], b[f] = b[f], b[h]
+            if isinstance(c[q], int):
+                result += chr(c[q] ^ b[(b[h] + b[f]) % 256])
+            else:
+                result += chr(ord(c[q]) ^ b[(b[h] + b[f]) % 256])
+            q += 1
+
+        return result
+
+    def trans_ee(a, c):
+        """str, str->str
+        This is an RC4 encryption."""
+
         f = h = 0
         b = list(range(256))
         result = ''
@@ -41,6 +72,7 @@ class Youku(VideoExtractor):
             f = (f + b[h] + ord(a[h % len(a)])) % 256
             b[h], b[f] = b[f], b[h]
             h += 1
+
         q = f = h = 0
         while q < len(c):
             h = (h + 1) % 256
@@ -55,7 +87,9 @@ class Youku(VideoExtractor):
         return result
 
     def generate_ep(self, no, streamfileids, sid, token):
+
         number = hex(int(str(no), 10))[2:].upper()
+        print(number)
         if len(number) == 1:
             number = '0' + number
         fileid = streamfileids[0:8] + number + streamfileids[10:]
@@ -65,6 +99,9 @@ class Youku(VideoExtractor):
                 sid + '_' + fileid + '_' + token)).encode('latin1')),
             safe='~()*!.\''
         )
+
+        print(fileid)
+        print(ep)
         return fileid, ep
 
     # Obsolete -- used to parse m3u8 on pl.youku.com
@@ -150,7 +187,6 @@ class Youku(VideoExtractor):
 
         opener = request.build_opener(ssl_context, cookie_handler, proxy_handler)
         opener.addheaders = [('Cookie', '__ysuid={}'.format(time.time()))]
-        print(123456789)
         print('__ysuid={}'.format(time.time()))
         request.install_opener(opener)
 
@@ -170,7 +206,6 @@ class Youku(VideoExtractor):
             api12_url = kwargs['api12_url']  # 86
             self.ctype = kwargs['ctype']
             self.title = kwargs['title']
-
         # 获取视频的详细url
         else:
             api_url = 'http://play.youku.com/play/get.json?vid=%s&ct=10' % self.vid
@@ -182,6 +217,7 @@ class Youku(VideoExtractor):
                 api_url,
                 headers={'Referer': 'http://static.youku.com/'}
             ))
+
             meta12 = json.loads(get_content(
                 api12_url,
                 headers={'Referer': 'http://static.youku.com/'}
@@ -222,8 +258,8 @@ class Youku(VideoExtractor):
         # 获取ip
         self.ip = data12['security']['ip']
 
-        print('ep---->>> ' + self.ep)
-        print(self.ip)
+        print('ep: ' + self.ep)
+        print('ip: %d' % self.ip)
 
         if 'stream' not in data and self.password_protected:
             log.wtf('[Failed] Wrong password.')
@@ -305,17 +341,18 @@ class Youku(VideoExtractor):
             # Extract stream with the best quality
             stream_id = self.streams_sorted[0]['id']
         # 获取视频format -->> stream_id
-
-        print("ep---------------------->>>>>>>>>>")
-        print(self.ep)
-        print(base64.b64decode(bytes(self.ep, 'ascii')))
+        # print(base64.b64decode(bytes(self.ep, 'ascii')))
         # 获取加密编码
+        self.ep = 'MwXWSQ4bL77S0vXJ8eJxUIX1vhFp1w/KWhs='
         e_code = self.__class__.trans_e(
             self.f_code_1,
             base64.b64decode(bytes(self.ep, 'ascii'))
         )
+        print('e_code:' + e_code)
         # 获取sid token
         sid, token = e_code.split('_')
+
+
 
         while True:
             try:
@@ -355,8 +392,9 @@ class Youku(VideoExtractor):
                         print(q)
                         print(u)
                         # 获取下载的真实地址 -- 就是解析上面url请求的数据
+                        print(u)
                         ksegs += [i['server'] for i in json.loads(get_content(u))]
-                        print(ksegs)
+                        # print(ksegs)
             except error.HTTPError as e:
                 # Use fallback stream data in case of HTTP 404
                 log.e('[Error] ' + str(e))

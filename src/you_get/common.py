@@ -325,15 +325,14 @@ def get_content(url, headers={}, decoded=True):
         data = ungzip(data)
     elif content_encoding == 'deflate':
         data = undeflate(data)
-
     # Decode the response body
     if decoded:
         charset = match1(response.getheader('Content-Type'), r'charset=([\w-]+)')
         if charset is not None:
             data = data.decode(charset)
         else:
+            print(type(data))
             data = data.decode('utf-8')
-
     return data
 
 def url_size(url, faker = False, headers = {}):

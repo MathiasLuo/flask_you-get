@@ -16,11 +16,11 @@ def L(n, t):
 
 
 def rshift(val, n):
-    return val >> n if val >= 0 else (val+0x100000000) >> n
+    return val >> n if val >= 0 else (val + 0x100000000) >> n
 
 
 def trunc(n):
-    n = n % 0x100000000
+    n %= 0x100000000
     if n > 0x7fffffff:
         n -= 0x100000000
     return n
@@ -60,31 +60,32 @@ def gen_sc(tvid, Z):
         I = i >> 4
         C_index = [i, 5 * i + 1, 3 * i + 5, 7 * i][I] % 16 + rshift(a, 6)
         m = L(
-                L(
-                    o[0],
-                    [
-                        trunc(o[1] & o[2]) | trunc(~o[1] & o[3]),
-                        trunc(o[3] & o[1]) | trunc(~o[3] & o[2]),
-                        o[1] ^ o[2] ^ o[3],
-                        o[2] ^ trunc(o[1] | ~o[3])
-                    ][I]
-                ),
-                L(
-                    trunc(int(abs(math.sin(i + 1)) * 4294967296)),
-                    C[C_index] if C_index < len(C) else None
-                )
+            L(
+                o[0],
+                [
+                    trunc(o[1] & o[2]) | trunc(~o[1] & o[3]),
+                    trunc(o[3] & o[1]) | trunc(~o[3] & o[2]),
+                    o[1] ^ o[2] ^ o[3],
+                    o[2] ^ trunc(o[1] | ~o[3])
+                ][I]
+            ),
+            L(
+                trunc(int(abs(math.sin(i + 1)) * 4294967296)),
+                C[C_index] if C_index < len(C) else None
             )
+        )
         I = I_table[4 * I + i % 4]
         o = [
-                o[3],
-                L(o[1], trunc(trunc(m << I) | rshift(m, 32 - I))),
-                o[1],
-                o[2],
-            ]
+            o[3],
+            L(o[1], trunc(trunc(m << I) | rshift(m, 32 - I))),
+            o[1],
+            o[2],
+        ]
 
     new_M = [L(o[0], M[0]), L(o[1], M[1]), L(o[2], M[2]), L(o[3], M[3])]
     s = [new_M[a >> 3] >> (1 ^ a & 7) * 4 & 15 for a in range(32)]
     return binascii.hexlify(bytes(s))[1::2]
+
 
 if __name__ == '__main__':
     print(gen_sc("494496100", 1466495259194))

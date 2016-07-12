@@ -721,7 +721,7 @@ def get_output_filename(urls, title, ext, output_dir, merge):
 
 def download_urls(urls, title, ext, total_size, output_dir='.', refer=None, merge=True, faker=False, headers={},
                   **kwargs):
-    print(urls)
+    print(str(urls)[1:-1])
     # assert urls
     # if json_output:
     #     json_output_.download_urls(urls=urls, title=title, ext=ext, total_size=total_size, refer=refer)

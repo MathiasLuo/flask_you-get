@@ -4,6 +4,7 @@ import json
 from flask import request
 from flask import Flask
 
+from tests.ffprobe_test import getVideoJsonInfo
 from you_get.common import any_download
 
 
@@ -57,8 +58,24 @@ def get_urls():
         for str in s:
             if re.findall(r'(http://[^?]+)', str):
                 api_list = str
-    return json.dumps({'url': api_list})
+
+    urls_json = []
+    video_list = api_list.replace("'", "").split(',')
+    for index in range(len(video_list)):
+        u = video_list[index].strip()
+        video_json = json.loads(getVideoJsonInfo("%s" % u))
+        time_length = video_json['format']['duration']
+        file_size = video_json['format']['size']
+
+        urls_json.append({
+            "size": file_size,
+            "seconds": time_length,
+            "number": index,
+            "url": u
+        })
+
+    return json.dumps({'url': urls_json})
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5001)

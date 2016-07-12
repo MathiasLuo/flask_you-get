@@ -21,16 +21,8 @@ def fn_timer(function):
     return function_timer
 
 
-def getVideoSize(url):
-    s = os.popen('ffprobe -v quiet -print_format json -show_format -show_streams "%s"' % url).read()
-    print(s)
+def getVideoJsonInfo(url):
+    video_json = os.popen('ffprobe -v quiet -print_format json -show_format -show_streams "%s"' % url).read()
+    return video_json
 
 
-if __name__ == '__main__':
-    time0 = time.time()
-    li = []
-    for i in li:
-        getVideoSize(i)
-    time1 = time.time()
-    print('time ---------------------------------')
-    print(time1 - time0)

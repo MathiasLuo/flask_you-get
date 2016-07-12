@@ -51,7 +51,6 @@ class VideoExtractor():
             self.streams_sorted = [
                 dict([('itag', stream_type['itag'])] + list(self.streams[stream_type['itag']].items())) for stream_type
                 in self.__class__.stream_types if stream_type['itag'] in self.streams]
-        print(self.streams_sorted)
 
         self.extract(**kwargs)
         self.download(**kwargs)
@@ -73,9 +72,6 @@ class VideoExtractor():
             self.streams_sorted = [
                 dict([('itag', stream_type['itag'])] + list(self.streams[stream_type['itag']].items())) for stream_type
                 in self.__class__.stream_types if stream_type['itag'] in self.streams]
-
-
-        print(self.streams_sorted)
 
         self.extract(**kwargs)
 
@@ -187,9 +183,8 @@ class VideoExtractor():
                     self.p([])
                 else:
                     stream_id = self.streams_sorted[0]['id'] if 'id' in self.streams_sorted[0] else \
-                    self.streams_sorted[0]['itag']
+                        self.streams_sorted[0]['itag']
                     self.p_i(stream_id)
-
         else:
             if 'stream_id' in kwargs and kwargs['stream_id']:
                 # Download the stream
@@ -220,9 +215,9 @@ class VideoExtractor():
                           output_dir=kwargs['output_dir'],
                           merge=kwargs['merge'],
                           av=stream_id in self.dash_streams)
-            if not kwargs['caption']:
-                print('Skipping captions.')
-                return
+            # if not kwargs['caption']:
+            #     print('Skipping captions.')
+            #     return
             for lang in self.caption_tracks:
                 filename = '%s.%s.srt' % (get_filename(self.title), lang)
                 print('Saving %s ... ' % filename, end="", flush=True)
@@ -233,6 +228,6 @@ class VideoExtractor():
                 print('Done.')
 
                 # For main_dev()
-                # download_urls(urls, self.title, self.streams[stream_id]['container'], self.streams[stream_id]['size'])
+                # download_urls(urls, self.title, self. [stream_id]['container'], self.streams[stream_id]['size'])
 
         self.__init__()

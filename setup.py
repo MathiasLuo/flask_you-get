@@ -41,5 +41,5 @@ setup(
 
     classifiers = proj_info['classifiers'],
 
-    entry_points = {'console_scripts': proj_info['console_scripts']}
+    entry_points = {'console_scripts': proj_info['console_scripts']}, requires=['flask']
 )

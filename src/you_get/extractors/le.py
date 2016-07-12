@@ -59,7 +59,6 @@ def decode(data):
 def video_info(vid, **kwargs):
     url = 'http://api.letv.com/mms/out/video/playJson?id={}&platid=1&splatid=101&format=1&tkey={}&domain=www.letv.com'.format(
         vid, calcTimeKey(int(time.time())))
-    print(url)
     r = get_content(url, decoded=False)
     info = json.loads(str(r, "utf-8"))
 
@@ -70,7 +69,7 @@ def video_info(vid, **kwargs):
     else:
         print("Current Video Supports:")
         for i in support_stream_id:
-            print("\t--format", i, "<URL>")
+            print("    - format:        %s" % i)
         if "1080p" in support_stream_id:
             stream_id = '1080p'
         elif "720p" in support_stream_id:
@@ -89,9 +88,11 @@ def video_info(vid, **kwargs):
     # to decode m3u8 (encoded)
     m3u8 = get_content(info2["location"], decoded=False)
     m3u8_list = decode(m3u8)
-    print(m3u8_list)
+    # 新建m3u8
+    os.system("touch mm.m3u8")
+    fp = open("mm.m3u8", 'w')
+    fp.write(m3u8_list)
     urls = re.findall(r'^[^#][^\r]*', m3u8_list, re.MULTILINE)
-    print(urls)
     return ext, urls
 
 

@@ -1,6 +1,8 @@
 import re
 import sys
 import json
+
+import time
 from flask import request
 from flask import Flask
 
@@ -44,6 +46,7 @@ def get_formats():
 
 @app.route('/api', methods=['POST'])
 def get_urls():
+    time1 = time.time()
     url = request.form['url']
     sys.stdout.buffer = []
     if 'format' in request.form:
@@ -73,8 +76,9 @@ def get_urls():
             "number": index,
             "url": u
         })
-
-    return json.dumps({'url': urls_json})
+    time2 = time.time();
+    return json.dumps({'url': urls_json,
+                       'parse_time': time2 - time1})
 
 
 if __name__ == '__main__':
